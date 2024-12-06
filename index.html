@@ -3,74 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Form</title>
+    <title>WeatherText</title>
     <style>
-        /* ... */
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        h1 { text-align: center; color: #333; }
+        label, input, select, button { width: 100%; margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #007BFF; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); }
+        .modal-content { background: #fefefe; margin: 15% auto; padding: 20px; border-radius: 8px; width: 80%; }
+        .close { float: right; font-size: 28px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Submit Your Information</h1>
+        <h1>WeatherText</h1>
         <form id="submit-form" action="https://formspree.io/f/xbljbzkb" method="POST">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-
-            <label for="phone">Phone Number:</label>
-            <input type="tel" id="phone" name="phone" required pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}">
-
-            <label for="country">Country:</label>
-            <input type="text" id="country" name="country" required>
-
-            <label for="city">City:</label>
-            <input type="text" id="city" name="city" required>
-
-            <label for="interval">Interval:</label>
-            <select id="interval" name="interval" required>
+            <label>Name:</label><input type="text" name="name" required>
+            <label>Phone:</label><input type="tel" name="phone" required pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}">
+            <label>Country:</label><input type="text" name="country" required>
+            <label>City:</label><input type="text" name="city" required>
+            <label>Interval:</label>
+            <select name="interval" required>
                 <option value="day">Day</option>
                 <option value="week">Week</option>
                 <option value="month">Month</option>
             </select>
-
-            <button type="submit">Submit</button>
+            <button type="submit">Get my Weather</button>
         </form>
     </div>
+
+    <div class="modal" id="pricingModal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>A little note...</h2>
+            <p>I'm a highschool developer who worked on this for quite some time.</p>
+            <p>I'm proud to be providing this service to you all for free, but it does come with a cost.</p>
+            <p>If you could donate, please do :) Anything helps to keep this site and service running.</p>
+        </div>
+    </div>
+
     <script>
+        window.onload = () => { document.getElementById('pricingModal').style.display = 'block'; }
+        document.getElementById('closeModal').onclick = () => { document.getElementById('pricingModal').style.display = 'none'; }
         document.getElementById('submit-form').addEventListener('submit', async (event) => {
             event.preventDefault();
-
-            const name = document.getElementById('name').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const country = document.getElementById('country').value.trim();
-            const city = document.getElementById('city').value.trim();
-            const interval = document.getElementById('interval').value.trim();
-
-            const data = {
-                name,
-                phone,
-                country,
-                city,
-                interval
-            };
-
+            const data = Object.fromEntries(new FormData(event.target));
             try {
-                const response = await fetch(event.target.action, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-                if (response.ok) {
-                    alert('Submission successful!');
-                    document.getElementById('submit-form').reset();
-                } else {
-                    throw new Error('Submission failed.');
-                }
-            } catch (error) {
-                alert('An error occurred while submitting the form.');
-                console.error(error);
-            }
+                const response = await fetch(event.target.action, { method: 'POST', headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                if (response.ok) { alert('Submission successful!'); event.target.reset(); }
+                else throw new Error('Submission failed.');
+            } catch (error) { alert('An error occurred.'); console.error(error); }
         });
     </script>
 </body>
